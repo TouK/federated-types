@@ -40,5 +40,8 @@
     "husky": "^7.0.1",
     "prettier": "^2.1.2",
     "semantic-release": "^17.4.4"
+  },
+  "dependencies": {
+    "find-node-modules": "^2.1.2"
   }
 }
