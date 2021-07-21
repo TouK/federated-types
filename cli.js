@@ -2,8 +2,19 @@
 
 const path = require('path');
 const fs = require('fs');
-const os = require("os");
+const findNodeModules = require('find-node-modules');
 const ts = require('typescript');
+
+const formatHost = {
+  getCurrentDirectory: ts.sys.getCurrentDirectory,
+  getNewLine: () => ts.sys.newLine
+};
+
+function reportDiagnostic(diagnostic) {
+  console.log("TS Error", diagnostic.code, ":", ts.flattenDiagnosticMessageText( diagnostic.messageText, formatHost.getNewLine()));
+}
+
+const [nodeModules] = findNodeModules({ cwd: process.argv[1], relative: false });
 
 const getArg = (argName) => {
     const argIndex = process.argv.indexOf(argName);
@@ -11,20 +22,21 @@ const getArg = (argName) => {
 };
 
 const outDirArg = getArg('--outputDir');
+
 const outputDir = outDirArg
     ? path.resolve('./', outDirArg)
-    : path.resolve(__dirname, '../../@types/__federated_types/');
+    : path.resolve(nodeModules, '@types/__federated_types/');
 
 const findFederationConfig = (base) => {
     let files = fs.readdirSync(base);
     let queue = [];
 
-    for( let i = 0; i < files.length; i++ ) {
+    for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const newBase = path.join(base, file);
         if (file === 'federation.config.json') {
             return path.resolve('./', newBase);
-        } else if(fs.statSync(newBase).isDirectory() && !newBase.includes('node_modules')) {
+        } else if (fs.statSync(newBase).isDirectory() && !newBase.includes('node_modules')) {
             queue.push(newBase);
         }
     }
@@ -45,7 +57,13 @@ console.log(`Using config file: ${federationConfigPath}`);
 
 const federationConfig = require(federationConfigPath);
 const compileFiles = Object.values(federationConfig.exposes);
+const compileKeys = Object.keys(federationConfig.exposes);
 const outFile = path.resolve(outputDir, `${federationConfig.name}.d.ts`);
+
+function getModuleDeclareName(exposeName) {
+    // windows paths 🤦
+    return path.join(federationConfig.name, exposeName).replace(/[\\/]/g, '/');
+}
 
 try {
     if (fs.existsSync(outFile)) {
@@ -62,7 +80,13 @@ try {
         esModuleInterop: true,
     });
 
-    program.emit();
+    const { emitSkipped, diagnostics } = program.emit();
+
+    diagnostics.forEach(reportDiagnostic)
+
+    if (emitSkipped) {
+        process.exit(0)
+    }
 
     let typing = fs.readFileSync(outFile, { encoding: 'utf8', flag: 'r' });
 
@@ -74,8 +98,23 @@ try {
     }
 
     moduleNames.forEach((name) => {
-        const regex = RegExp(`"${name}`, 'g');
-        typing = typing.replace(regex, `"${federationConfig.name}/${name}`);
+        // exposeName - relative name of exposed component (if not found - just take moduleName)
+        const [exposeName = name, ...aliases] = compileKeys.filter(key => federationConfig.exposes[key].endsWith(name));
+        const regex = RegExp(`"${name}"`, 'g');
+
+        const moduleDeclareName = getModuleDeclareName(exposeName);
+
+        // language=TypeScript
+        const createAliasModule = name => `
+            declare module "${getModuleDeclareName(name)}" {
+                export * from "${moduleDeclareName}"
+            }
+        `;
+
+        typing = [
+            typing.replace(regex, `"${moduleDeclareName}"`),
+            ...aliases.map(createAliasModule),
+        ].join('\n');
     });
 
     console.log('writing typing file:', outFile);
@@ -83,19 +122,17 @@ try {
     fs.writeFileSync(outFile, typing);
 
     // if we are writing to the node_modules/@types directory, add a package.json file
-    if (outputDir.includes( os.platform() === "win32"
-                ? "node_modules\\@types"
-                : "node_modules/@types")) {
+    if (outputDir.includes(path.join('node_modules', '@types'))) {
         const packageJsonPath = path.resolve(outputDir, 'package.json');
 
         if (!fs.existsSync(packageJsonPath)) {
-            console.log('writing package.json:', packageJsonPath);
+            console.debug('writing package.json:', packageJsonPath);
             fs.copyFileSync(path.resolve(__dirname, 'typings.package.tmpl.json'), packageJsonPath);
         } else {
-            console.log(packageJsonPath, 'already exists');
+            console.debug(packageJsonPath, 'already exists');
         }
     } else {
-        console.log('not writing to node modules, dont need a package.json');
+        console.debug('not writing to node modules, dont need a package.json');
     }
 
     // write/update the index.d.ts file
@@ -113,7 +150,7 @@ try {
         }
     }
 
-    console.log('Success!');
+    console.debug('Success!');
 } catch (e) {
     console.error(`ERROR:`, e);
     process.exit(1);
