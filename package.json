@@ -1,34 +1,42 @@
 {
-    "name": "@pixability-ui/federated-types",
-    "version": "0.1.0",
-    "description": "share typings for your federated typescript packages around your mono-repo",
-    "main": "cli.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "Jonathan Greene <jgreene@pixability.com>",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/pixability/federated-types.git"
-    },
-    "files": [
-        "cli.js",
-        "typings.package.tmpl.json"
-    ],
-    "keywords": [
-        "module-federation",
-        "typescript",
-        "typings",
-        "mono-repo"
-    ],
-    "bin": {
-        "make-federated-types": "./cli.js"
-    },
-    "peerDependencies": {
-        "typescript": "^4.0.5"
-    },
-    "devDependencies": {
-        "prettier": "^2.1.2"
-    }
+  "name": "@touk/federated-types",
+  "version": "0.0.0-development",
+  "description": "share typings for your federated typescript packages around your mono-repo",
+  "main": "cli.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "semantic-release": "semantic-release"
+  },
+  "author": "Julian Wielga <j@touk.pl>",
+  "contributors": [
+    "Jonathan Greene <jgreene@pixability.com>"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/touk/federated-types.git"
+  },
+  "files": [
+    "cli.js",
+    "typings.package.tmpl.json"
+  ],
+  "keywords": [
+    "module-federation",
+    "typescript",
+    "typings",
+    "mono-repo"
+  ],
+  "bin": {
+    "make-federated-types": "./cli.js"
+  },
+  "peerDependencies": {
+    "typescript": "^4.0.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-conventional": "^12.1.4",
+    "husky": "^7.0.1",
+    "prettier": "^2.1.2",
+    "semantic-release": "^17.4.4"
+  }
 }
