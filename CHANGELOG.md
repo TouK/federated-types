@@ -1,3 +1,10 @@
+# [1.0.0-beta.3](https://github.com/touk/federated-types/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2021-07-21)
+
+
+### Features
+
+* aliases support, cleanup ([064eb35](https://github.com/touk/federated-types/commit/064eb35d608752ecb5b2bbd0c27bdc149c1c31b7))
+
 # [1.0.0-beta.2](https://github.com/touk/federated-types/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2021-07-21)
 
 
