@@ -1,6 +1,6 @@
 {
   "name": "@touk/federated-types",
-  "version": "0.0.0-development",
+  "version": "1.0.0-beta.1",
   "description": "share typings for your federated typescript packages around your mono-repo",
   "main": "cli.js",
   "scripts": {
