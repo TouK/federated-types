@@ -27,6 +27,11 @@ const outputDir = outDirArg
     ? path.resolve('./', outDirArg)
     : path.resolve(nodeModules, '@types/__federated_types/');
 
+const configPathArg = getArg('--config');
+const configPath = configPathArg
+    ? path.resolve(configPathArg)
+    : null;
+
 const findFederationConfig = (base) => {
     let files = fs.readdirSync(base);
     let queue = [];
@@ -46,7 +51,13 @@ const findFederationConfig = (base) => {
     }
 };
 
-const federationConfigPath = findFederationConfig('./');
+if (configPath && !fs.existsSync(configPath)) {
+    console.error(`ERROR: Unable to find a provided config: ${configPath}`);
+    process.exit(1);
+}
+
+const federationConfigPath = configPath || findFederationConfig('./');
+
 
 if (federationConfigPath === undefined) {
     console.error(`ERROR: Unable to find a federation.config.json file in this package`);
