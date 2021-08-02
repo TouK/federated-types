@@ -1,3 +1,10 @@
+# [1.0.0-beta.4](https://github.com/touk/federated-types/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2021-08-02)
+
+
+### Features
+
+* use custom config path with --config arg ([cca1f10](https://github.com/touk/federated-types/commit/cca1f1013f441142447d34e651b81806c2368526))
+
 # [1.0.0-beta.3](https://github.com/touk/federated-types/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2021-07-21)
 
 
