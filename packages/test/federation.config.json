@@ -1,0 +1,6 @@
+{
+  "name": "testTest",
+  "exposes": {
+    "./test": "./src/test"
+  }
+}

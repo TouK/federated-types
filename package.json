@@ -39,6 +39,9 @@
   "repository": "touk/federated-types.git",
   "scripts": {
     "semantic-release": "semantic-release",
-    "test": "echo \"Error: no test specified\" && exit 0"
-  }
+    "test": "npm run make-types -workspaces --if-present"
+  },
+  "workspaces": [
+    "./packages/*"
+  ]
 }
