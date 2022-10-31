@@ -1,20 +1,25 @@
 {
   "name": "@touk/federated-types",
-  "version": "1.1.0",
   "description": "share typings for your federated typescript packages around your mono-repo",
-  "main": "cli.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0",
-    "semantic-release": "semantic-release"
-  },
+  "version": "1.2.0-beta.1",
   "author": "Julian Wielga <j@touk.pl>",
+  "bin": {
+    "make-federated-types": "./cli.js"
+  },
   "contributors": [
     "Jonathan Greene <jgreene@pixability.com>"
   ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/touk/federated-types.git"
+  "dependencies": {
+    "find-node-modules": "2.1.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "17.1.2",
+    "@commitlint/config-conventional": "13.2.0",
+    "@semantic-release/changelog": "6.0.1",
+    "@semantic-release/git": "10.0.1",
+    "husky": "8.0.1",
+    "prettier": "2.7.1",
+    "semantic-release": "19.0.5"
   },
   "files": [
     "cli.js",
@@ -22,26 +27,21 @@
   ],
   "keywords": [
     "module-federation",
+    "mono-repo",
     "typescript",
-    "typings",
-    "mono-repo"
+    "typings"
   ],
-  "bin": {
-    "make-federated-types": "./cli.js"
-  },
+  "license": "MIT",
+  "main": "cli.js",
   "peerDependencies": {
-    "typescript": "^4.0.5"
+    "typescript": ">4.0.0"
   },
-  "devDependencies": {
-    "@commitlint/cli": "^13.1.0",
-    "@commitlint/config-conventional": "^13.1.0",
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "husky": "^7.0.1",
-    "prettier": "^2.1.2",
-    "semantic-release": "^17.4.4"
+  "repository": "touk/federated-types.git",
+  "scripts": {
+    "semantic-release": "semantic-release",
+    "test": "npm run make-types -workspaces --if-present"
   },
-  "dependencies": {
-    "find-node-modules": "^2.1.2"
-  }
+  "workspaces": [
+    "./packages/*"
+  ]
 }
