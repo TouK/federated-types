@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/touk/federated-types/compare/v1.1.0...v1.2.0) (2022-10-31)
+
+
+### Bug Fixes
+
+* npm audit fix ([e95a125](https://github.com/touk/federated-types/commit/e95a125541584a95038d209f285ef28ea60a38d2))
+
+
+### Features
+
+* "--saveToNodeModules" param ([8ca1214](https://github.com/touk/federated-types/commit/8ca1214759cc2659e546c5e99d3121374947be4b))
+
 # [1.2.0-beta.1](https://github.com/touk/federated-types/compare/v1.1.0...v1.2.0-beta.1) (2022-10-31)
 
 
