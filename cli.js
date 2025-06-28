@@ -140,8 +140,9 @@ try {
 
     outputDirs.forEach(_outputDir => {
         const _outFile = path.resolve(_outputDir, `${federationConfig.name}.d.ts`);
-        console.log('writing typing file:', _outFile);
 
+        console.log('writing typing file:', _outFile);
+        fs.mkdirSync(path.dirname(_outFile), { recursive: true });
         fs.writeFileSync(_outFile, typing);
 
         console.debug(`using output dir: ${_outputDir}`);
