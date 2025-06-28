@@ -1,3 +1,10 @@
+# [1.2.0-beta.2](https://github.com/touk/federated-types/compare/v1.2.0-beta.1...v1.2.0-beta.2) (2025-06-28)
+
+
+### Bug Fixes
+
+* create missing dir ([61b2956](https://github.com/touk/federated-types/commit/61b295649390b9c6356035bac4d6361704591d7e))
+
 # [1.2.0-beta.1](https://github.com/touk/federated-types/compare/v1.1.0...v1.2.0-beta.1) (2022-10-31)
 
 
