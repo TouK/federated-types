@@ -98,7 +98,7 @@ try {
         declaration: true,
         emitDeclarationOnly: true,
         skipLibCheck: true,
-        jsx: 'react',
+        jsx: ts.JsxEmit.React,
         esModuleInterop: true,
     });
 
