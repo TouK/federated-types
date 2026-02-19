@@ -14,7 +14,6 @@ npm install @touk/federated-types
 
 You'll also need to place a `federation.config.json` in each package being federated. It will contain the remote name and exported members. These properties are used in Webpack's `ModuleFederationPlugin` configuration object. An example:
 
-
 ```json
 //federation.config.json
 
@@ -27,7 +26,6 @@ You'll also need to place a `federation.config.json` in each package being feder
 ```
 
 It's recommended that you spread these properties into your ModuleFederationPlugin configuration, like so:
-
 
 ```javascript
 //webpack.config.js
@@ -55,7 +53,6 @@ module.exports = {
 
 Then you can call `make-federated-types` from your `scripts` block in your package's `package.json` file:
 
-
 ```javascript
 //package.json
 
@@ -68,7 +65,6 @@ This will write new package to the `node_modules/@types/__federated_types` in yo
 
 If you would rather specify a directory in which to write the typing files, you can pass an `--outputDir` parameter to the command like so:
 
-
 ```javascript
 //package.json
 
@@ -76,6 +72,7 @@ scripts: {
     "make-types": "make-federated-types --outputDir ../../my_types/"
 }
 ```
+
 You can add an `--saveToNodeModules` parameter to save in both places.
 
 If you would like to specify custom path to the config, you can pass `--config` parameter like so:

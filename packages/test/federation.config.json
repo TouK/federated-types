@@ -1,6 +1,6 @@
 {
-  "name": "testTest",
-  "exposes": {
-    "./test": "./src/test"
-  }
+    "name": "testTest",
+    "exposes": {
+        "./test": "./src/test"
+    }
 }
