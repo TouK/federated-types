@@ -1,3 +1,11 @@
+## [1.2.2-beta.1](https://github.com/touk/federated-types/compare/v1.2.1...v1.2.2-beta.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* ci build ([a3f874f](https://github.com/touk/federated-types/commit/a3f874fb81da3f056b8cf20e714740cc3a03afa5))
+* update major deps ([b7f5168](https://github.com/touk/federated-types/commit/b7f516815c8da61760da3746ce47455c5c968c72))
+
 ## [1.2.1](https://github.com/touk/federated-types/compare/v1.2.0...v1.2.1) (2025-06-28)
 
 
