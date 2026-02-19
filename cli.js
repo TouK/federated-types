@@ -7,11 +7,16 @@ const ts = require('typescript');
 
 const formatHost = {
     getCurrentDirectory: ts.sys.getCurrentDirectory,
-    getNewLine: () => ts.sys.newLine
+    getNewLine: () => ts.sys.newLine,
 };
 
 function reportDiagnostic(diagnostic) {
-  console.log("TS Error", diagnostic.code, ":", ts.flattenDiagnosticMessageText( diagnostic.messageText, formatHost.getNewLine()));
+    console.log(
+        'TS Error',
+        diagnostic.code,
+        ':',
+        ts.flattenDiagnosticMessageText(diagnostic.messageText, formatHost.getNewLine())
+    );
 }
 
 const [nodeModules] = findNodeModules({ cwd: process.argv[1], relative: false });
@@ -29,18 +34,15 @@ const nodeModulesOutputDir = path.resolve(nodeModules, '@types/__federated_types
 const saveToNodeMoulesArg = hasArg('--saveToNodeModules');
 const outDirArg = getArg('--outputDir');
 
-const outputDir = outDirArg
-    ? path.resolve('./', outDirArg)
-    : nodeModulesOutputDir;
+const outputDir = outDirArg ? path.resolve('./', outDirArg) : nodeModulesOutputDir;
 
-const outputDirs = outputDir !== nodeModulesOutputDir && saveToNodeMoulesArg
-    ? [nodeModulesOutputDir, outputDir]
-    : [outputDir];
+const outputDirs =
+    outputDir !== nodeModulesOutputDir && saveToNodeMoulesArg
+        ? [nodeModulesOutputDir, outputDir]
+        : [outputDir];
 
 const configPathArg = getArg('--config');
-const configPath = configPathArg
-    ? path.resolve(configPathArg)
-    : null;
+const configPath = configPathArg ? path.resolve(configPathArg) : null;
 
 const findFederationConfig = (base) => {
     let files = fs.readdirSync(base);
@@ -56,7 +58,7 @@ const findFederationConfig = (base) => {
         }
     }
 
-    for( let i = 0; i < queue.length; i++ ) {
+    for (let i = 0; i < queue.length; i++) {
         return findFederationConfig(queue[i]);
     }
 };
@@ -67,7 +69,6 @@ if (configPath && !fs.existsSync(configPath)) {
 }
 
 const federationConfigPath = configPath || findFederationConfig('./');
-
 
 if (federationConfigPath === undefined) {
     console.error(`ERROR: Unable to find a federation.config.json file in this package`);
@@ -103,10 +104,10 @@ try {
 
     const { emitSkipped, diagnostics } = program.emit();
 
-    diagnostics.forEach(reportDiagnostic)
+    diagnostics.forEach(reportDiagnostic);
 
     if (emitSkipped) {
-        process.exit(0)
+        process.exit(0);
     }
 
     let typing = fs.readFileSync(outFile, { encoding: 'utf8', flag: 'r' });
@@ -114,19 +115,22 @@ try {
     const moduleRegex = RegExp(/declare module "(.*)"/, 'g');
     const moduleNames = [];
 
+    let execResults;
     while ((execResults = moduleRegex.exec(typing)) !== null) {
         moduleNames.push(execResults[1]);
     }
 
     moduleNames.forEach((name) => {
         // exposeName - relative name of exposed component (if not found - just take moduleName)
-        const [exposeName = name, ...aliases] = compileKeys.filter(key => federationConfig.exposes[key].endsWith(name));
+        const [exposeName = name, ...aliases] = compileKeys.filter((key) =>
+            federationConfig.exposes[key].endsWith(name)
+        );
         const regex = RegExp(`"${name}"`, 'g');
 
         const moduleDeclareName = getModuleDeclareName(exposeName);
 
         // language=TypeScript
-        const createAliasModule = name => `
+        const createAliasModule = (name) => `
             declare module "${getModuleDeclareName(name)}" {
                 export * from "${moduleDeclareName}"
             }
@@ -138,7 +142,7 @@ try {
         ].join('\n');
     });
 
-    outputDirs.forEach(_outputDir => {
+    outputDirs.forEach((_outputDir) => {
         const _outFile = path.resolve(_outputDir, `${federationConfig.name}.d.ts`);
 
         console.log('writing typing file:', _outFile);
@@ -152,7 +156,10 @@ try {
 
             if (!fs.existsSync(packageJsonPath)) {
                 console.debug('writing package.json:', packageJsonPath);
-                fs.copyFileSync(path.resolve(__dirname, 'typings.package.tmpl.json'), packageJsonPath);
+                fs.copyFileSync(
+                    path.resolve(__dirname, 'typings.package.tmpl.json'),
+                    packageJsonPath
+                );
             } else {
                 console.debug(packageJsonPath, 'already exists');
             }
