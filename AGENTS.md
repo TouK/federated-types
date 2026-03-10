@@ -2,214 +2,142 @@
 
 ## Project Overview
 
-**federated-types** is a TypeScript tooling package that generates ambient type definitions for Webpack 5 Module Federation in monorepos. It provides a CLI command `make-federated-types` that creates TypeScript declaration files for federated modules.
+**federated-types** generates TypeScript type definitions for Webpack 5 Module Federation in monorepos. CLI tool that creates `.d.ts` files for federated modules.
 
-- **Main entry**: `cli.js` - Node.js CLI tool
-- **Language**: JavaScript (Node.js) with TypeScript peer dependency
-- **Architecture**: NPM workspaces monorepo with test package in `packages/test/`
+- **Main entry**: `cli.js` - Node.js CLI (JavaScript, not TypeScript)
+- **Node version**: v22.14.0 (see `.nvmrc`)
+- **Architecture**: NPM workspaces monorepo with test packages
 - **Key dependencies**: TypeScript compiler API, find-node-modules
 
 ## Build, Test & Lint Commands
 
-### Installation
-
 ```bash
+# Install dependencies
 npm install
-```
 
-### Testing
-
-```bash
-# Run all tests (file-based config + inline config)
+# Run all tests (both workspaces with validation)
 npm test
 
-# Run single test package (file-based config)
-npm run make-types -w packages/test
+# Run single test workspace
+npm run make-types -w packages/test        # file-based config
+npm run make-types -w packages/test-inline # inline config
 
-# Run inline config test package
-npm run make-types -w packages/test-inline
-
-# Run CLI directly for specific package
-./cli.js --outputDir ./test-results
-./cli.js --config ./path/to/federation.config.json --outputDir ./output
-
-# Test inline config directly
+# Test CLI directly
+./cli.js --config ./packages/test/federation.config.json --outputDir ./test-results
 ./cli.js --name myApp --exposes App ./src/App.tsx --outputDir ./test-results
-```
 
-### Formatting
-
-```bash
-# Format code with Prettier
-npx prettier --write .
-
-# Check formatting
-npx prettier --check .
-```
-
-### Release
-
-```bash
-# Semantic release (automated via CI)
-npm run semantic-release
+# Format code
+npx prettier --write .    # Format all
+npx prettier --check .    # Check only
 ```
 
 ## Code Style Guidelines
 
-### Formatting (Prettier)
+### Prettier Configuration
 
 - **Tab width**: 4 spaces
-- **Single quotes**: Always use `'` instead of `"`
+- **Quotes**: Single quotes (`'`)
 - **Print width**: 100 characters
-- **Trailing commas**: ES5 style (objects, arrays)
+- **Trailing commas**: ES5 (objects, arrays)
 - **Semicolons**: Required
-
-### File Structure
-
-```
-/
-├── cli.js                           # Main CLI entry point
-├── typings.package.tmpl.json        # Template for generated package.json
-├── packages/
-│   ├── test/                        # Test workspace (file-based config)
-│   │   ├── federation.config.json   # Federation configuration
-│   │   └── src/                     # Test source files
-│   └── test-inline/                 # Test workspace (inline config)
-│       ├── package.json             # Uses --name and --exposes in script
-│       └── src/                     # Test source files
-└── test-results/                    # Generated type definitions (gitignored)
-```
 
 ### Naming Conventions
 
-- **Variables/functions**: camelCase (e.g., `findFederationConfig`, `getModuleDeclareName`)
-- **Constants**: camelCase for regular, UPPER_CASE for true constants
-- **Files**: kebab-case for configs, camelCase.js for code
-- **Module names**: Follow federation config naming (e.g., `testTest`)
+- **Variables/functions**: camelCase (`findFederationConfig`, `getModuleDeclareName`)
+- **Constants**: camelCase (no UPPER_CASE unless truly constant)
+- **Files**: `kebab-case.js` for configs, `camelCase.js` for code
+- **Module names**: Follow federation config (e.g., `testTest`, `testInline`)
 
-### Code Patterns
-
-#### Error Handling
+### Error Handling
 
 ```javascript
-// CLI errors - exit with code 1 and descriptive message
 if (!fs.existsSync(configPath)) {
     console.error(`ERROR: Unable to find a provided config: ${configPath}`);
     process.exit(1);
 }
-
-// Catch blocks with context
-try {
-    // operation
-} catch (e) {
-    console.error(`ERROR:`, e);
-    process.exit(1);
-}
 ```
 
-#### Argument Parsing
+### Argument Parsing
 
 ```javascript
-const hasArg = (argName) => {
-    const argIndex = process.argv.indexOf(argName);
-    return argIndex !== -1;
-};
-const getArg = (argName) => {
-    const argIndex = process.argv.indexOf(argName);
-    return argIndex !== -1 ? process.argv[argIndex + 1] : null;
+const hasArg = (argName) => process.argv.indexOf(argName) !== -1;
+const getArg = (argName) => process.argv[process.argv.indexOf(argName) + 1] || null;
+const getAllArgs = (argName) => {
+    // Returns [[key, value], ...] for repeated --exposes args
+    // See cli.js:34-50 for implementation
 };
 ```
 
-#### Path Handling
+### Path & File Operations
 
-- Use `path.resolve()` for absolute paths
-- Use `path.join()` for combining paths
-- Always normalize with `.replace(/[\\/]/g, '/')` for cross-platform (Windows/Unix)
+- Use `path.resolve()` for absolute, `path.join()` for combining
+- **Always normalize**: `.replace(/[\\/]/g, '/')` for Windows compatibility
+- Synchronous fs ops: `fs.mkdirSync(dir, {recursive: true})`, `fs.existsSync()`
+- Console: `console.log()` (progress), `console.error('ERROR:')` (errors)
 
-### TypeScript Compiler Integration
+## TypeScript Compiler Integration
 
-- Use TypeScript compiler API: `ts.createProgram()`, `program.emit()`
-- Report diagnostics: `ts.flattenDiagnosticMessageText()`
-- Compiler options:
-    ```javascript
-    {
-        outFile,
-        declaration: true,
-        emitDeclarationOnly: true,
-        skipLibCheck: true,
-        jsx: 'react',
-        esModuleInterop: true,
-    }
-    ```
+```javascript
+const program = ts.createProgram(compileFiles, {
+    outFile,
+    declaration: true,
+    emitDeclarationOnly: true,
+    skipLibCheck: true,
+    jsx: ts.JsxEmit.React,
+    esModuleInterop: true,
+});
+```
 
-### Module Declaration Generation
-
-- Parse module declarations with regex: `/declare module "(.*)"/g`
-- Transform module names based on federation config's `exposes` mapping
-- Support aliases by creating re-export modules
-- Generate cross-platform paths (normalize slashes)
-
-### File Operations
-
-- Create directories recursively: `fs.mkdirSync(dir, { recursive: true })`
-- Check existence before operations: `fs.existsSync()`
-- Use synchronous fs operations in CLI context
-- Clean up old files before regenerating: `fs.unlinkSync()`
-
-### Console Output
-
-- Info: `console.log()` for progress messages
-- Debug: `console.debug()` for detailed diagnostics
-- Errors: `console.error()` with `ERROR:` prefix
+**Module transformations**: Parse `/declare module "(.*)"/g`, transform based on `exposes`, normalize paths
 
 ## Commit Message Convention
 
-Uses **Conventional Commits** via commitlint:
+**Conventional Commits** enforced via commitlint:
 
 - `feat:` - New features
 - `fix:` - Bug fixes
-- `chore:` - Maintenance tasks
-- `build:` - Build system/dependencies
 - `test:` - Test additions/changes
+- `chore:` - Maintenance (deps, config)
+- `docs:` - Documentation only
 - Scopes: `(deps)`, `(deps-dev)`, `(release)`
-- Examples: `feat: "--saveToNodeModules" param`, `fix: create missing dir`
 
-## Release Process
+Examples:
 
-Automated via semantic-release:
-
-- **Branches**: `master` (stable), `dev` (beta prereleases)
-- **Changelog**: Auto-generated
-- **Version**: Automated based on commit types
-- **NPM**: Published to `@touk/federated-types`
+- `feat: add inline config via --name and --exposes`
+- `fix: normalize Windows paths in module names`
+- `test: add validation for generated types`
 
 ## Key Workflows
 
 ### Adding New CLI Arguments
 
-1. Add argument parsing with `hasArg()` or `getArg()`
-2. Update logic to handle new parameter
-3. Document in README.md
-4. Add test case in `packages/test/`
+1. Add parsing with `hasArg()`, `getArg()`, or `getAllArgs()`
+2. Implement logic in `cli.js`
+3. Add validation and error messages
+4. Update `README.md` with examples
+5. Add test case in appropriate workspace
+
+### Adding Tests
+
+1. Create test files in workspace (`packages/test/` or `packages/test-inline/`)
+2. Add/update `validate-types.js` with assertions
+3. Run `npm test` to verify
+4. Assertions should check: file existence, module declarations, exports/interfaces
 
 ### Modifying Type Generation
 
-1. Update `cli.js` compiler options or module transformation logic
-2. Test with `npm test` to verify generated types
+1. Update `cli.js` compiler options or transformation logic
+2. Run `npm test` - verify all validations pass
 3. Check output in `test-results/` directory
-4. Ensure Windows path compatibility
-
-### Debugging
-
-- Check TypeScript diagnostics output
-- Verify `federation.config.json` structure
-- Inspect generated `.d.ts` files in output directory
-- Test with actual module federation project
+4. Test Windows path compatibility (use `.replace(/[\\/]/g, '/')`)
+5. Ensure backward compatibility with existing configs
 
 ## Important Notes
 
-- This is a **tooling package** - changes must not break existing generated types
-- **Cross-platform compatibility** is critical (Windows/Unix path handling)
-- TypeScript peer dependency must stay `>4.0.0`
-- Generated files go to `node_modules/@types/__federated_types/` by default
-- Support both node_modules and custom output directories
+- **Backward compatibility** - Don't break existing federation.config.json files
+- **Cross-platform** - Always test path handling (Windows uses `\`, Unix uses `/`)
+- **Inline config priority** - inline > --config > auto-find
+- **Auto-prefix** - Keys without `./` get prefixed automatically (e.g., `App` → `./App`)
+- **TypeScript peer dependency** - Must stay `>4.0.0`
+- **Default output** - `node_modules/@types/__federated_types/`
+- **Test workspaces** - Both run validation after generation
