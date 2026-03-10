@@ -30,7 +30,6 @@ It's recommended that you spread these properties into your ModuleFederationPlug
 ```javascript
 //webpack.config.js
 
-const deps = require('../package.json').dependencies;
 const federationConfig = require('./federation.config.json');
 
 module.exports = {
@@ -40,9 +39,7 @@ module.exports = {
         new ModuleFederationPlugin({
             ...federationConfig,
             filename: "remoteEntry.js",
-            shared: {
-                ...deps,
-            },
+            shared: { ... },
         }),
     ],
 

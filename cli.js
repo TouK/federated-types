@@ -122,9 +122,10 @@ try {
 
     moduleNames.forEach((name) => {
         // exposeName - relative name of exposed component (if not found - just take moduleName)
-        const [exposeName = name, ...aliases] = compileKeys.filter((key) =>
-            federationConfig.exposes[key].endsWith(name)
-        );
+        const [exposeName = name, ...aliases] = compileKeys.filter((key) => {
+            const normalizedPath = federationConfig.exposes[key].replace(/\.(tsx?|jsx?)$/, '');
+            return normalizedPath.endsWith(name);
+        });
         const regex = RegExp(`"${name}"`, 'g');
 
         const moduleDeclareName = getModuleDeclareName(exposeName);
