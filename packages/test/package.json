@@ -3,6 +3,6 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "make-types": "../../cli.js --outputDir ../../test-results"
+        "make-types": "../../cli.js --outputDir ../../test-results && node validate-types.js"
     }
 }
