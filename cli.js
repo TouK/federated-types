@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const findNodeModules = require('find-node-modules');
 const ts = require('typescript');
+const chalk = require('chalk');
 
 const formatHost = {
     getCurrentDirectory: ts.sys.getCurrentDirectory,
@@ -12,8 +13,8 @@ const formatHost = {
 
 function reportDiagnostic(diagnostic) {
     console.log(
-        'TS Error',
-        diagnostic.code,
+        chalk.red('TS Error'),
+        chalk.yellow(diagnostic.code),
         ':',
         ts.flattenDiagnosticMessageText(diagnostic.messageText, formatHost.getNewLine())
     );
@@ -40,7 +41,7 @@ const getAllArgs = (argName) => {
                 results.push([process.argv[i + 1], process.argv[i + 2]]);
                 i += 3; // skip argName, key, value
             } else {
-                console.error(`ERROR: --exposes requires two arguments (key path)`);
+                console.error(chalk.red('ERROR:'), '--exposes requires two arguments (key path)');
                 process.exit(1);
             }
         } else {
@@ -66,6 +67,10 @@ const configPath = configPathArg ? path.resolve(configPathArg) : null;
 
 const nameArg = getArg('--name');
 const exposesArgs = getAllArgs('--exposes');
+const verboseArg = hasArg('--verbose') || process.env.npm_config_loglevel === 'verbose';
+
+const log = (...args) => console.log(...args);
+const logDebug = (...args) => verboseArg && console.debug(chalk.gray.dim(...args));
 
 const findFederationConfig = (base) => {
     let files = fs.readdirSync(base);
@@ -92,12 +97,18 @@ let federationConfig;
 if (nameArg || exposesArgs.length > 0) {
     // Inline config mode
     if (!nameArg || exposesArgs.length === 0) {
-        console.error('ERROR: Both --name and --exposes are required for inline config');
+        console.error(
+            chalk.red('ERROR:'),
+            'Both --name and --exposes are required for inline config'
+        );
         process.exit(1);
     }
 
     if (configPath) {
-        console.warn('WARNING: Both inline config and --config provided. Using inline config.');
+        console.warn(
+            chalk.yellow('WARNING:'),
+            'Both inline config and --config provided. Using inline config.'
+        );
     }
 
     const exposes = {};
@@ -113,22 +124,26 @@ if (nameArg || exposesArgs.length > 0) {
         exposes: exposes,
     };
 
-    console.log('Using inline config:', JSON.stringify(federationConfig, null, 2));
+    log('Using inline config');
+    logDebug(JSON.stringify(federationConfig, null, 2));
 } else {
     // File-based config (current behavior)
     if (configPath && !fs.existsSync(configPath)) {
-        console.error(`ERROR: Unable to find a provided config: ${configPath}`);
+        console.error(chalk.red('ERROR:'), `Unable to find a provided config: ${configPath}`);
         process.exit(1);
     }
 
     const federationConfigPath = configPath || findFederationConfig('./');
 
     if (federationConfigPath === undefined) {
-        console.error(`ERROR: Unable to find a federation.config.json file in this package`);
+        console.error(
+            chalk.red('ERROR:'),
+            'Unable to find a federation.config.json file in this package'
+        );
         process.exit(1);
     }
 
-    console.log(`Using config file: ${federationConfigPath}`);
+    log('Using config file', chalk.blue.bold(federationConfigPath));
     federationConfig = require(federationConfigPath);
 }
 
@@ -141,6 +156,7 @@ function getModuleDeclareName(exposeName) {
 }
 
 try {
+    fs.mkdirSync(outputDir, { recursive: true });
     const outFile = path.resolve(outputDir, `${federationConfig.name}.d.ts`);
     if (fs.existsSync(outFile)) {
         fs.unlinkSync(outFile);
@@ -200,23 +216,23 @@ try {
     outputDirs.forEach((_outputDir) => {
         const _outFile = path.resolve(_outputDir, `${federationConfig.name}.d.ts`);
 
-        console.log('writing typing file:', _outFile);
+        logDebug('writing typing file:', _outFile);
         fs.mkdirSync(path.dirname(_outFile), { recursive: true });
         fs.writeFileSync(_outFile, typing);
 
-        console.debug(`using output dir: ${_outputDir}`);
+        logDebug(`using output dir: ${_outputDir}`);
         // if we are writing to the node_modules/@types directory, add a package.json file
         if (_outputDir.includes(path.join('node_modules', '@types'))) {
             const packageJsonPath = path.resolve(_outputDir, 'package.json');
 
             if (!fs.existsSync(packageJsonPath)) {
-                console.debug('writing package.json:', packageJsonPath);
+                logDebug('writing package.json:', packageJsonPath);
                 fs.copyFileSync(
                     path.resolve(__dirname, 'typings.package.tmpl.json'),
                     packageJsonPath
                 );
             } else {
-                console.debug(packageJsonPath, 'already exists');
+                logDebug(packageJsonPath, 'already exists');
             }
         }
 
@@ -225,18 +241,18 @@ try {
         const importStatement = `export * from './${federationConfig.name}';`;
 
         if (!fs.existsSync(indexPath)) {
-            console.log('creating index.d.ts file');
+            logDebug('creating index.d.ts file');
             fs.writeFileSync(indexPath, `${importStatement}\n`);
         } else {
-            console.log('updating index.d.ts file');
+            logDebug('updating index.d.ts file');
             const contents = fs.readFileSync(indexPath);
             if (!contents.includes(importStatement)) {
                 fs.writeFileSync(indexPath, `${contents}${importStatement}\n`);
             }
         }
     });
-    console.debug('Success!');
+    log(chalk.green('✓'), `Generated types for ${chalk.blue.bold(federationConfig.name)}`);
 } catch (e) {
-    console.error(`ERROR:`, e);
+    console.error(chalk.red('ERROR:'), e);
     process.exit(1);
 }

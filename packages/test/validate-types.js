@@ -2,13 +2,14 @@
 
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 
 const typingsFile = path.resolve(__dirname, '../../test-results/testTest.d.ts');
 
-console.log('Validating testTest.d.ts...');
+console.log(`Validating ${chalk.blue('testTest.d.ts')}...`);
 
 if (!fs.existsSync(typingsFile)) {
-    console.error('ERROR: testTest.d.ts was not generated');
+    console.error(chalk.red(`ERROR: ${chalk.blue('testTest.d.ts')} was not generated`));
     process.exit(1);
 }
 
@@ -26,21 +27,21 @@ let errors = 0;
 
 requiredModules.forEach((module) => {
     if (!content.includes(module)) {
-        console.error(`ERROR: Missing module declaration: ${module}`);
+        console.error(chalk.red(`ERROR: Missing module declaration: ${chalk.blue(module)}`));
         errors++;
     }
 });
 
 requiredExports.forEach((exp) => {
     if (!content.includes(exp)) {
-        console.error(`ERROR: Missing export: ${exp}`);
+        console.error(chalk.red(`ERROR: Missing export: ${chalk.blue(exp)}`));
         errors++;
     }
 });
 
 if (errors > 0) {
-    console.error(`\nValidation failed with ${errors} error(s)`);
+    console.error(chalk.red(`\nValidation failed with ${errors} error(s)`));
     process.exit(1);
 }
 
-console.log('✓ All validations passed for testTest.d.ts');
+console.log(chalk.green(`✓ All validations passed for ${chalk.blue('testTest.d.ts')}`));
