@@ -81,3 +81,43 @@ scripts: {
     "make-types": "make-federated-types --config ./path/to/my/config.json --outputDir ../../my_types/"
 }
 ```
+
+## Inline configuration (without config file)
+
+If you prefer not to maintain a separate `federation.config.json` file, you can provide the configuration directly via CLI arguments using `--name` and `--exposes`:
+
+```bash
+make-federated-types \
+  --name myApp \
+  --exposes App ./src/App.tsx \
+  --exposes Button ./src/components/Button.tsx \
+  --outputDir ./types
+```
+
+### Inline config features:
+
+- **Multiple exposures**: Use `--exposes` multiple times, each followed by a key and file path
+- **Auto-prefix**: Keys without `./` prefix are automatically normalized (e.g., `App` becomes `./App`)
+- **Shell-friendly**: Works with tab completion for file paths
+- **Priority**: Inline config takes precedence over `--config` and auto-discovery
+
+### Examples:
+
+```bash
+# Simple inline config
+make-federated-types --name app2 --exposes Button ./src/Button.tsx
+
+# Multiple exposures
+make-federated-types \
+  --name app2 \
+  --exposes ./Button ./src/Button.tsx \
+  --exposes ./Header ./src/Header.tsx
+
+# Nested keys (auto-prefixed with ./)
+make-federated-types \
+  --name app2 \
+  --exposes components/Button ./src/components/Button.tsx \
+  --exposes utils/helpers ./src/utils/helpers.ts
+```
+
+**Note**: When using inline config, both `--name` and at least one `--exposes` are required.

@@ -29,6 +29,26 @@ const getArg = (argName) => {
     const argIndex = process.argv.indexOf(argName);
     return argIndex !== -1 ? process.argv[argIndex + 1] : null;
 };
+const getAllArgs = (argName) => {
+    const results = [];
+    let i = 2; // process.argv starts with node and script path
+
+    while (i < process.argv.length) {
+        if (process.argv[i] === argName) {
+            // Next two arguments are key and value
+            if (i + 2 < process.argv.length) {
+                results.push([process.argv[i + 1], process.argv[i + 2]]);
+                i += 3; // skip argName, key, value
+            } else {
+                console.error(`ERROR: --exposes requires two arguments (key path)`);
+                process.exit(1);
+            }
+        } else {
+            i++;
+        }
+    }
+    return results;
+};
 
 const nodeModulesOutputDir = path.resolve(nodeModules, '@types/__federated_types/');
 const saveToNodeMoulesArg = hasArg('--saveToNodeModules');
@@ -43,6 +63,9 @@ const outputDirs =
 
 const configPathArg = getArg('--config');
 const configPath = configPathArg ? path.resolve(configPathArg) : null;
+
+const nameArg = getArg('--name');
+const exposesArgs = getAllArgs('--exposes');
 
 const findFederationConfig = (base) => {
     let files = fs.readdirSync(base);
@@ -63,21 +86,52 @@ const findFederationConfig = (base) => {
     }
 };
 
-if (configPath && !fs.existsSync(configPath)) {
-    console.error(`ERROR: Unable to find a provided config: ${configPath}`);
-    process.exit(1);
+let federationConfig;
+
+// Priority: inline config > --config > auto-find
+if (nameArg || exposesArgs.length > 0) {
+    // Inline config mode
+    if (!nameArg || exposesArgs.length === 0) {
+        console.error('ERROR: Both --name and --exposes are required for inline config');
+        process.exit(1);
+    }
+
+    if (configPath) {
+        console.warn('WARNING: Both inline config and --config provided. Using inline config.');
+    }
+
+    const exposes = {};
+
+    exposesArgs.forEach(([key, value]) => {
+        // Normalize key - add ./ if missing
+        const normalizedKey = key.startsWith('./') ? key : `./${key}`;
+        exposes[normalizedKey] = value;
+    });
+
+    federationConfig = {
+        name: nameArg,
+        exposes: exposes,
+    };
+
+    console.log('Using inline config:', JSON.stringify(federationConfig, null, 2));
+} else {
+    // File-based config (current behavior)
+    if (configPath && !fs.existsSync(configPath)) {
+        console.error(`ERROR: Unable to find a provided config: ${configPath}`);
+        process.exit(1);
+    }
+
+    const federationConfigPath = configPath || findFederationConfig('./');
+
+    if (federationConfigPath === undefined) {
+        console.error(`ERROR: Unable to find a federation.config.json file in this package`);
+        process.exit(1);
+    }
+
+    console.log(`Using config file: ${federationConfigPath}`);
+    federationConfig = require(federationConfigPath);
 }
 
-const federationConfigPath = configPath || findFederationConfig('./');
-
-if (federationConfigPath === undefined) {
-    console.error(`ERROR: Unable to find a federation.config.json file in this package`);
-    process.exit(1);
-}
-
-console.log(`Using config file: ${federationConfigPath}`);
-
-const federationConfig = require(federationConfigPath);
 const compileFiles = Object.values(federationConfig.exposes);
 const compileKeys = Object.keys(federationConfig.exposes);
 
