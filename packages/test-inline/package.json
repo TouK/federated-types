@@ -1,0 +1,8 @@
+{
+    "name": "test-inline",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "make-types": "../../cli.js --name testInline --exposes App ./src/App.tsx --exposes utils/helper ./src/utils/helper.ts --outputDir ../../test-results"
+    }
+}

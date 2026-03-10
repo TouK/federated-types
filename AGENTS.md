@@ -20,15 +20,21 @@ npm install
 ### Testing
 
 ```bash
-# Run tests in all workspaces (generates types for test package)
+# Run all tests (file-based config + inline config)
 npm test
 
-# Run single test package
+# Run single test package (file-based config)
 npm run make-types -w packages/test
+
+# Run inline config test package
+npm run make-types -w packages/test-inline
 
 # Run CLI directly for specific package
 ./cli.js --outputDir ./test-results
 ./cli.js --config ./path/to/federation.config.json --outputDir ./output
+
+# Test inline config directly
+./cli.js --name myApp --exposes App ./src/App.tsx --outputDir ./test-results
 ```
 
 ### Formatting
@@ -65,8 +71,11 @@ npm run semantic-release
 ├── cli.js                           # Main CLI entry point
 ├── typings.package.tmpl.json        # Template for generated package.json
 ├── packages/
-│   └── test/                        # Test workspace
-│       ├── federation.config.json   # Federation configuration
+│   ├── test/                        # Test workspace (file-based config)
+│   │   ├── federation.config.json   # Federation configuration
+│   │   └── src/                     # Test source files
+│   └── test-inline/                 # Test workspace (inline config)
+│       ├── package.json             # Uses --name and --exposes in script
 │       └── src/                     # Test source files
 └── test-results/                    # Generated type definitions (gitignored)
 ```
