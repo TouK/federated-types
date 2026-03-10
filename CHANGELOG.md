@@ -1,3 +1,10 @@
+# [1.3.0-beta.2](https://github.com/touk/federated-types/compare/v1.3.0-beta.1...v1.3.0-beta.2) (2026-03-10)
+
+
+### Features
+
+* add colored output with chalk ([1b33197](https://github.com/touk/federated-types/commit/1b3319781edf5b2f900026dbcf718d1cbcaae515))
+
 # [1.3.0-beta.1](https://github.com/touk/federated-types/compare/v1.2.2-beta.1...v1.3.0-beta.1) (2026-03-10)
 
 
