@@ -1,3 +1,15 @@
+# [1.3.0-beta.1](https://github.com/touk/federated-types/compare/v1.2.2-beta.1...v1.3.0-beta.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* extension in exposed path ([e707c3e](https://github.com/touk/federated-types/commit/e707c3e8fb6aa53f0f9a961cf5b425b09f2626f6))
+
+
+### Features
+
+* add inline config via --name and --exposes CLI arguments ([34e4752](https://github.com/touk/federated-types/commit/34e4752e2c5b2d35e788b82faf8d463981b29368))
+
 ## [1.2.2-beta.1](https://github.com/touk/federated-types/compare/v1.2.1...v1.2.2-beta.1) (2026-02-19)
 
 
