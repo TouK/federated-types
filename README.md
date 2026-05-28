@@ -14,7 +14,6 @@ npm install @touk/federated-types
 
 You'll also need to place a `federation.config.json` in each package being federated. It will contain the remote name and exported members. These properties are used in Webpack's `ModuleFederationPlugin` configuration object. An example:
 
-
 ```json
 //federation.config.json
 
@@ -28,11 +27,9 @@ You'll also need to place a `federation.config.json` in each package being feder
 
 It's recommended that you spread these properties into your ModuleFederationPlugin configuration, like so:
 
-
 ```javascript
 //webpack.config.js
 
-const deps = require('../package.json').dependencies;
 const federationConfig = require('./federation.config.json');
 
 module.exports = {
@@ -42,9 +39,7 @@ module.exports = {
         new ModuleFederationPlugin({
             ...federationConfig,
             filename: "remoteEntry.js",
-            shared: {
-                ...deps,
-            },
+            shared: { ... },
         }),
     ],
 
@@ -54,7 +49,6 @@ module.exports = {
 ```
 
 Then you can call `make-federated-types` from your `scripts` block in your package's `package.json` file:
-
 
 ```javascript
 //package.json
@@ -68,7 +62,6 @@ This will write new package to the `node_modules/@types/__federated_types` in yo
 
 If you would rather specify a directory in which to write the typing files, you can pass an `--outputDir` parameter to the command like so:
 
-
 ```javascript
 //package.json
 
@@ -76,6 +69,7 @@ scripts: {
     "make-types": "make-federated-types --outputDir ../../my_types/"
 }
 ```
+
 You can add an `--saveToNodeModules` parameter to save in both places.
 
 If you would like to specify custom path to the config, you can pass `--config` parameter like so:
@@ -87,3 +81,43 @@ scripts: {
     "make-types": "make-federated-types --config ./path/to/my/config.json --outputDir ../../my_types/"
 }
 ```
+
+## Inline configuration (without config file)
+
+If you prefer not to maintain a separate `federation.config.json` file, you can provide the configuration directly via CLI arguments using `--name` and `--exposes`:
+
+```bash
+make-federated-types \
+  --name myApp \
+  --exposes App ./src/App.tsx \
+  --exposes Button ./src/components/Button.tsx \
+  --outputDir ./types
+```
+
+### Inline config features:
+
+- **Multiple exposures**: Use `--exposes` multiple times, each followed by a key and file path
+- **Auto-prefix**: Keys without `./` prefix are automatically normalized (e.g., `App` becomes `./App`)
+- **Shell-friendly**: Works with tab completion for file paths
+- **Priority**: Inline config takes precedence over `--config` and auto-discovery
+
+### Examples:
+
+```bash
+# Simple inline config
+make-federated-types --name app2 --exposes Button ./src/Button.tsx
+
+# Multiple exposures
+make-federated-types \
+  --name app2 \
+  --exposes ./Button ./src/Button.tsx \
+  --exposes ./Header ./src/Header.tsx
+
+# Nested keys (auto-prefixed with ./)
+make-federated-types \
+  --name app2 \
+  --exposes components/Button ./src/components/Button.tsx \
+  --exposes utils/helpers ./src/utils/helpers.ts
+```
+
+**Note**: When using inline config, both `--name` and at least one `--exposes` are required.

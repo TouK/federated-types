@@ -1,6 +1,8 @@
 {
-  "name": "testTest",
-  "exposes": {
-    "./test": "./src/test"
-  }
+    "name": "testTest",
+    "exposes": {
+        "./test": "./src/test",
+        "./env": "./src/parsed.ts",
+        "./Component": "./src/Component.tsx"
+    }
 }
