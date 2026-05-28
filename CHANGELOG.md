@@ -1,3 +1,16 @@
+# [1.3.0-beta.3](https://github.com/touk/federated-types/compare/v1.3.0-beta.2...v1.3.0-beta.3) (2026-05-28)
+
+
+### Bug Fixes
+
+* trigger release after orphaned 1.3.0-beta.3 tag ([61ddeb3](https://github.com/touk/federated-types/commit/61ddeb34bc0687a36a519ab3524b170a793dfcb8))
+* use correct npm config key for min-release-age ([a50c721](https://github.com/touk/federated-types/commit/a50c7212394ef9af1f50ebbd4a0753d012dbae0c))
+
+
+### Performance Improvements
+
+* cache TS build info for incremental type generation ([e8ab9e6](https://github.com/touk/federated-types/commit/e8ab9e633e450fd7d0d2705466b712f08d9d1cc6))
+
 # [1.3.0-beta.2](https://github.com/touk/federated-types/compare/v1.3.0-beta.1...v1.3.0-beta.2) (2026-03-10)
 
 
