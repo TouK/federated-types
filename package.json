@@ -38,7 +38,10 @@
     "peerDependencies": {
         "typescript": ">4.0.0"
     },
-    "repository": "touk/federated-types.git",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TouK/federated-types.git"
+    },
     "scripts": {
         "semantic-release": "semantic-release",
         "test": "npm run make-types -workspaces --if-present"
