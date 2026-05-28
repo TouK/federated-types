@@ -1,3 +1,10 @@
+# [1.3.0-beta.5](https://github.com/TouK/federated-types/compare/v1.3.0-beta.4...v1.3.0-beta.5) (2026-05-28)
+
+
+### Bug Fixes
+
+* trigger beta release to verify OIDC after secret cleanup ([41fcc4e](https://github.com/TouK/federated-types/commit/41fcc4e93128f05e37968913b187c8303bddc07f))
+
 # [1.3.0-beta.4](https://github.com/TouK/federated-types/compare/v1.3.0-beta.3...v1.3.0-beta.4) (2026-05-28)
 
 
