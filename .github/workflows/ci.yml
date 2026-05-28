@@ -40,6 +40,9 @@ jobs:
         runs-on: ubuntu-latest
         # Only run release on master (production) or dev (beta)
         if: github.event_name == 'push'
+        # Gates OIDC token issuance to this environment, which is restricted
+        # to master/dev in GitHub repo settings. Required by npm trusted publisher.
+        environment: npm-publish
         permissions:
             contents: write
             issues: write
@@ -63,7 +66,6 @@ jobs:
             - name: Release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
               run: npx semantic-release
 
             # Sync dev branch with master after production release
