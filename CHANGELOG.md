@@ -1,3 +1,10 @@
+# [1.3.0-beta.4](https://github.com/TouK/federated-types/compare/v1.3.0-beta.3...v1.3.0-beta.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* use canonical TouK case in repository URL for npm provenance ([908e120](https://github.com/TouK/federated-types/commit/908e120becf3ace91d45faf09da4324ac533eb29))
+
 # [1.3.0-beta.3](https://github.com/touk/federated-types/compare/v1.3.0-beta.2...v1.3.0-beta.3) (2026-05-28)
 
 
