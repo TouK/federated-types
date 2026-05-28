@@ -10,6 +10,10 @@ updates:
       target-branch: 'dev'
       schedule:
           interval: 'weekly'
+      # Mirrors `min-release-age=7` in .npmrc: don't open PRs for versions
+      # younger than a week — same window we expect malware to be detected in.
+      cooldown:
+          default-days: 7
       labels:
           - 'dependencies'
       groups:
@@ -26,6 +30,8 @@ updates:
       target-branch: 'dev'
       schedule:
           interval: 'weekly'
+      cooldown:
+          default-days: 7
       labels:
           - 'dependencies'
           - 'github-actions'
