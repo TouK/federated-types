@@ -1,3 +1,10 @@
+# [1.3.0-beta.7](https://github.com/TouK/federated-types/compare/v1.3.0-beta.6...v1.3.0-beta.7) (2026-11-05)
+
+
+### Features
+
+* add --prune to drop modules unreachable from exposes ([6b000c3](https://github.com/TouK/federated-types/commit/6b000c3a3654d6c5dc1c84b208298f21deaad907))
+
 # [1.3.0-beta.6](https://github.com/TouK/federated-types/compare/v1.3.0-beta.5...v1.3.0-beta.6) (2026-11-05)
 
 
