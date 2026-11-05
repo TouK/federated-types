@@ -2,7 +2,6 @@
 
 const path = require('path');
 const fs = require('fs');
-const findNodeModules = require('find-node-modules');
 const ts = require('typescript');
 const chalk = require('chalk');
 
@@ -20,7 +19,20 @@ function reportDiagnostic(diagnostic) {
     );
 }
 
-const [nodeModules] = findNodeModules({ cwd: process.argv[1], relative: false });
+// nearest node_modules directory up from the CLI script
+const findNodeModules = (start) => {
+    let dir = path.resolve(start);
+    while (!fs.existsSync(path.join(dir, 'node_modules'))) {
+        const parent = path.dirname(dir);
+        if (parent === dir) {
+            return path.resolve('node_modules');
+        }
+        dir = parent;
+    }
+    return path.join(dir, 'node_modules');
+};
+
+const nodeModules = findNodeModules(process.argv[1]);
 
 const hasArg = (argName) => {
     const argIndex = process.argv.indexOf(argName);
