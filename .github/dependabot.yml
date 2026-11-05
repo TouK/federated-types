@@ -5,10 +5,33 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    target-branch: "dev"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
+    - package-ecosystem: 'npm'
+      directory: '/'
+      target-branch: 'dev'
+      schedule:
+          interval: 'weekly'
+      # Mirrors `min-release-age=7` in .npmrc: don't open PRs for versions
+      # younger than a week — same window we expect malware to be detected in.
+      cooldown:
+          default-days: 7
+      labels:
+          - 'dependencies'
+      groups:
+          dev-dependencies:
+              patterns:
+                  - '@commitlint/*'
+                  - '@semantic-release/*'
+              update-types:
+                  - 'minor'
+                  - 'patch'
+
+    - package-ecosystem: 'github-actions'
+      directory: '/'
+      target-branch: 'dev'
+      schedule:
+          interval: 'weekly'
+      cooldown:
+          default-days: 7
+      labels:
+          - 'dependencies'
+          - 'github-actions'

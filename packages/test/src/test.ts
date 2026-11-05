@@ -1,4 +1,4 @@
 export default {
-    aaa: "aaa",
+    aaa: 'aaa',
     bbb: 123,
 };

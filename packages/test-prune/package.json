@@ -1,0 +1,8 @@
+{
+    "name": "test-prune",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "make-types": "../../cli.js --name testPrune --exposes Widget ./src/Widget.ts --exposes WidgetAlias ./src/Widget.ts --outputDir ../../test-results --prune && node validate-types.js"
+    }
+}
