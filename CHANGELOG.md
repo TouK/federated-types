@@ -1,3 +1,10 @@
+# [1.3.0-beta.6](https://github.com/TouK/federated-types/compare/v1.3.0-beta.5...v1.3.0-beta.6) (2026-11-05)
+
+
+### Performance Improvements
+
+* rename federated modules in a single pass ([9a42c84](https://github.com/TouK/federated-types/commit/9a42c844c02ef2ca72b933a8356255589da86ea6))
+
 # [1.3.0-beta.5](https://github.com/TouK/federated-types/compare/v1.3.0-beta.4...v1.3.0-beta.5) (2026-05-28)
 
 
