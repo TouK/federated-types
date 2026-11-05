@@ -184,35 +184,48 @@ try {
     let typing = fs.readFileSync(outFile, { encoding: 'utf8', flag: 'r' });
 
     const moduleRegex = RegExp(/declare module "(.*)"/, 'g');
-    const moduleNames = [];
+    const exposedPaths = compileKeys.map((key) => [
+        key,
+        federationConfig.exposes[key].replace(/\.(tsx?|jsx?)$/, ''),
+    ]);
+
+    // module name emitted by tsc -> name it is declared under in the federated typings
+    const renames = new Map();
+    const aliasModules = [];
 
     let execResults;
     while ((execResults = moduleRegex.exec(typing)) !== null) {
-        moduleNames.push(execResults[1]);
-    }
+        const name = execResults[1];
+        if (renames.has(name)) {
+            continue;
+        }
 
-    moduleNames.forEach((name) => {
         // exposeName - relative name of exposed component (if not found - just take moduleName)
-        const [exposeName = name, ...aliases] = compileKeys.filter((key) => {
-            const normalizedPath = federationConfig.exposes[key].replace(/\.(tsx?|jsx?)$/, '');
-            return normalizedPath.endsWith(name);
-        });
-        const regex = RegExp(`"${name}"`, 'g');
+        const [exposeName = name, ...aliases] = exposedPaths
+            .filter(([, normalizedPath]) => normalizedPath.endsWith(name))
+            .map(([key]) => key);
 
         const moduleDeclareName = getModuleDeclareName(exposeName);
+        renames.set(name, moduleDeclareName);
 
         // language=TypeScript
-        const createAliasModule = (name) => `
-            declare module "${getModuleDeclareName(name)}" {
+        aliases.forEach((alias) =>
+            aliasModules.push(`
+            declare module "${getModuleDeclareName(alias)}" {
                 export * from "${moduleDeclareName}"
             }
-        `;
+        `)
+        );
+    }
 
-        typing = [
-            typing.replace(regex, `"${moduleDeclareName}"`),
-            ...aliases.map(createAliasModule),
-        ].join('\n');
-    });
+    if (renames.size > 0) {
+        // Rename every exact quoted occurrence of a module name in a single pass.
+        const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const namesRegex = RegExp(`"(${Array.from(renames.keys(), escapeRegExp).join('|')})"`, 'g');
+        typing = typing.replace(namesRegex, (match, name) => `"${renames.get(name)}"`);
+    }
+
+    typing = [typing, ...aliasModules].join('\n');
 
     outputDirs.forEach((_outputDir) => {
         const _outFile = path.resolve(_outputDir, `${federationConfig.name}.d.ts`);
