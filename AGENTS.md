@@ -15,12 +15,13 @@
 # Install dependencies
 npm install
 
-# Run all tests (both workspaces with validation)
+# Run all tests (all workspaces with validation)
 npm test
 
 # Run single test workspace
 npm run make-types -w packages/test        # file-based config
 npm run make-types -w packages/test-inline # inline config
+npm run make-types -w packages/test-prune  # inline config with --prune
 
 # Test CLI directly
 ./cli.js --config ./packages/test/federation.config.json --outputDir ./test-results
@@ -119,7 +120,7 @@ Examples:
 
 ### Adding Tests
 
-1. Create test files in workspace (`packages/test/` or `packages/test-inline/`)
+1. Create test files in workspace (`packages/test/`, `packages/test-inline/` or `packages/test-prune/`)
 2. Add/update `validate-types.js` with assertions
 3. Run `npm test` to verify
 4. Assertions should check: file existence, module declarations, exports/interfaces
@@ -140,4 +141,4 @@ Examples:
 - **Auto-prefix** - Keys without `./` get prefixed automatically (e.g., `App` → `./App`)
 - **TypeScript peer dependency** - Must stay `>4.0.0`
 - **Default output** - `node_modules/@types/__federated_types/`
-- **Test workspaces** - Both run validation after generation
+- **Test workspaces** - All run validation after generation

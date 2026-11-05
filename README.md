@@ -82,6 +82,20 @@ scripts: {
 }
 ```
 
+## Pruning unreachable modules
+
+By default the generated typings contain every module of the TypeScript program built from your exposes, including modules that are only used by their implementation. Pass `--prune` to keep only the modules reachable from the exposed modules through their types (`import`/`export ... from`, `import("...")`, `import "..."`, `require("...")`):
+
+```javascript
+//package.json
+
+scripts: {
+    "make-types": "make-federated-types --prune"
+}
+```
+
+Modules that augment the global scope (`declare global`) or other modules are always kept. With `--prune`, non-exposed modules can no longer be imported by their deep name (e.g. `myApp/utils/internal`) unless they are reachable from an exposed module.
+
 ## Inline configuration (without config file)
 
 If you prefer not to maintain a separate `federation.config.json` file, you can provide the configuration directly via CLI arguments using `--name` and `--exposes`:

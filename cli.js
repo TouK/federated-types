@@ -68,6 +68,7 @@ const configPath = configPathArg ? path.resolve(configPathArg) : null;
 const nameArg = getArg('--name');
 const exposesArgs = getAllArgs('--exposes');
 const verboseArg = hasArg('--verbose') || process.env.npm_config_loglevel === 'verbose';
+const pruneArg = hasArg('--prune');
 
 const log = (...args) => console.log(...args);
 const logDebug = (...args) => verboseArg && console.debug(chalk.gray.dim(...args));
@@ -155,6 +156,73 @@ function getModuleDeclareName(exposeName) {
     return path.join(federationConfig.name, exposeName).replace(/[\\/]/g, '/');
 }
 
+// Matches the module specifier of `from "x"`, `import("x")`, `import "x"` and `require("x")`.
+const moduleReferenceRegex = /\b(?:from|import|require)\s*\(?\s*(["'])([^"'\n]+)\1/g;
+// Global or module augmentations take effect without being imported, so such modules are always kept.
+// Inside a `declare module` block tsc emits them without the `declare` keyword.
+const augmentationRegex = /^\s+(?:declare\s+)?(?:global\s*\{|module\s+["'])/m;
+
+/**
+ * Drops the top-level `declare module` blocks that cannot be reached from the exposed modules
+ * through module references. Text outside the blocks is kept as is.
+ */
+function pruneUnreachableModules(typing, isExposedModule) {
+    const blockRegex = /^declare module "([^"]+)" \{\n[\s\S]*?^\}\n?/gm;
+    const segments = [];
+    const modules = new Map();
+    let lastIndex = 0;
+    let match;
+
+    while ((match = blockRegex.exec(typing)) !== null) {
+        segments.push(typing.slice(lastIndex, match.index));
+        const block = { name: match[1], text: match[0] };
+        segments.push(block);
+        modules.set(block.name, block);
+        lastIndex = blockRegex.lastIndex;
+    }
+    segments.push(typing.slice(lastIndex));
+
+    const roots = Array.from(modules.values()).filter(
+        (block) => isExposedModule(block.name) || augmentationRegex.test(block.text)
+    );
+
+    if (!roots.some((block) => isExposedModule(block.name))) {
+        console.warn(
+            chalk.yellow('WARNING:'),
+            'No exposed module found in the emitted typings, skipping --prune'
+        );
+        return typing;
+    }
+
+    const reachable = new Set();
+    const queue = [];
+    const visit = (text) => {
+        for (const [, , name] of text.matchAll(moduleReferenceRegex)) {
+            const block = modules.get(name);
+            if (block && !reachable.has(block)) {
+                reachable.add(block);
+                queue.push(block);
+            }
+        }
+    };
+
+    segments.filter((segment) => typeof segment === 'string').forEach(visit);
+    roots.forEach((block) => {
+        reachable.add(block);
+        queue.push(block);
+    });
+    while (queue.length > 0) {
+        visit(queue.pop().text);
+    }
+
+    logDebug(`--prune: kept ${reachable.size} of ${modules.size} modules`);
+
+    return segments
+        .filter((segment) => typeof segment === 'string' || reachable.has(segment))
+        .map((segment) => (typeof segment === 'string' ? segment : segment.text))
+        .join('');
+}
+
 try {
     fs.mkdirSync(outputDir, { recursive: true });
     const outFile = path.resolve(outputDir, `${federationConfig.name}.d.ts`);
@@ -188,6 +256,14 @@ try {
         key,
         federationConfig.exposes[key].replace(/\.(tsx?|jsx?)$/, ''),
     ]);
+    const findExposeKeys = (name) =>
+        exposedPaths
+            .filter(([, normalizedPath]) => normalizedPath.endsWith(name))
+            .map(([key]) => key);
+
+    if (pruneArg) {
+        typing = pruneUnreachableModules(typing, (name) => findExposeKeys(name).length > 0);
+    }
 
     // module name emitted by tsc -> name it is declared under in the federated typings
     const renames = new Map();
@@ -201,9 +277,7 @@ try {
         }
 
         // exposeName - relative name of exposed component (if not found - just take moduleName)
-        const [exposeName = name, ...aliases] = exposedPaths
-            .filter(([, normalizedPath]) => normalizedPath.endsWith(name))
-            .map(([key]) => key);
+        const [exposeName = name, ...aliases] = findExposeKeys(name);
 
         const moduleDeclareName = getModuleDeclareName(exposeName);
         renames.set(name, moduleDeclareName);

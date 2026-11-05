@@ -12,19 +12,21 @@ All in-repo artifacts are written in English: code, comments, config file commen
 
 `@touk/federated-types` is a single-file Node CLI (`cli.js`, plain JavaScript — not TypeScript) that generates ambient `.d.ts` declarations for Webpack 5 Module Federation `exposes` entries. The output lands in `node_modules/@types/__federated_types/` by default so the TS compiler picks it up without extra config.
 
-Two consumers feed the same CLI from `packages/`:
+Three consumers feed the same CLI from `packages/`:
 - `packages/test/` — file-based config via `federation.config.json`
 - `packages/test-inline/` — inline config via `--name` / `--exposes` flags
+- `packages/test-prune/` — inline config with `--prune`; its validator also checks that implementation-only modules are dropped and that the pruned file type-checks on its own
 
-Each workspace's `make-types` script generates types into the root `test-results/` directory, then runs `validate-types.js` to grep the output for required `declare module` blocks and exports. That double-step (generate + validate) is what `npm test` runs across both workspaces.
+Each workspace's `make-types` script generates types into the root `test-results/` directory, then runs `validate-types.js` to grep the output for required `declare module` blocks and exports. That double-step (generate + validate) is what `npm test` runs across all workspaces.
 
 ## Commands
 
 ```bash
 npm install                                  # install (uses workspaces)
-npm test                                     # generate + validate across both packages
+npm test                                     # generate + validate across all packages
 npm run make-types -w packages/test          # single workspace: file-based config
 npm run make-types -w packages/test-inline   # single workspace: inline config
+npm run make-types -w packages/test-prune    # single workspace: inline config with --prune
 ./cli.js --config ./packages/test/federation.config.json --outputDir ./test-results  # invoke CLI directly
 npx prettier --write .                       # format
 ```
