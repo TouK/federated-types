@@ -23,6 +23,7 @@ const requiredSnippets = [
     // reachable through the exposed types, directly and transitively
     'export interface WidgetProps',
     'export interface Theme',
+    'export interface HelperConfig',
     // unreachable, but kept because it augments the global scope
     '__TEST_PRUNE__',
 ];

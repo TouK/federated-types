@@ -168,6 +168,35 @@ function getModuleDeclareName(exposeName) {
     return path.join(federationConfig.name, exposeName).replace(/[\\/]/g, '/');
 }
 
+const toPosixPath = (value) => value.replace(/[\\/]/g, '/');
+const stripSourceExtension = (file) => file.replace(/\.(d\.ts|[cm]?tsx?|[cm]?jsx?)$/, '');
+
+/**
+ * Maps the absolute path (without extension) of every source file in the program to the module
+ * name tsc gives it in an outFile bundle: its path relative to the common source directory.
+ * Exposes outside of the exposing package (e.g. a package importing a sibling's sources) move
+ * that directory up, so the module name cannot be derived from the configured path alone.
+ */
+function getEmittedModuleNames(program) {
+    // internal, but stable TypeScript API; fall back to suffix matching without it
+    if (typeof program.getCommonSourceDirectory !== 'function') {
+        return new Map();
+    }
+    const commonSourceDirectory = program.getCommonSourceDirectory();
+    return new Map(
+        program
+            .getSourceFiles()
+            .filter((sourceFile) => !sourceFile.isDeclarationFile)
+            .map((sourceFile) => {
+                const absolutePath = stripSourceExtension(path.resolve(sourceFile.fileName));
+                return [
+                    toPosixPath(absolutePath),
+                    toPosixPath(path.relative(commonSourceDirectory, absolutePath)),
+                ];
+            })
+    );
+}
+
 // Matches the module specifier of `from "x"`, `import("x")`, `import "x"` and `require("x")`.
 const moduleReferenceRegex = /\b(?:from|import|require)\s*\(?\s*(["'])([^"'\n]+)\1/g;
 // Global or module augmentations take effect without being imported, so such modules are always kept.
@@ -264,14 +293,26 @@ try {
     let typing = fs.readFileSync(outFile, { encoding: 'utf8', flag: 'r' });
 
     const moduleRegex = RegExp(/declare module "(.*)"/, 'g');
-    const exposedPaths = compileKeys.map((key) => [
-        key,
-        federationConfig.exposes[key].replace(/\.(tsx?|jsx?)$/, ''),
-    ]);
+    const emittedModuleNames = getEmittedModuleNames(program);
+    const exposedModules = compileKeys.map((key) => {
+        const exposePath = federationConfig.exposes[key];
+        const absolutePath = toPosixPath(stripSourceExtension(path.resolve(exposePath)));
+        return {
+            key,
+            relativePath: exposePath.replace(/\.(tsx?|jsx?)$/, ''),
+            moduleName:
+                emittedModuleNames.get(absolutePath) ??
+                emittedModuleNames.get(`${absolutePath}/index`),
+        };
+    });
+    // Falls back to suffix matching of the configured path when the source file could not be
+    // resolved in the program.
     const findExposeKeys = (name) =>
-        exposedPaths
-            .filter(([, normalizedPath]) => normalizedPath.endsWith(name))
-            .map(([key]) => key);
+        exposedModules
+            .filter(({ relativePath, moduleName }) =>
+                moduleName !== undefined ? moduleName === name : relativePath.endsWith(name)
+            )
+            .map(({ key }) => key);
 
     if (pruneArg) {
         typing = pruneUnreachableModules(typing, (name) => findExposeKeys(name).length > 0);
