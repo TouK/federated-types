@@ -162,9 +162,6 @@ try {
         fs.unlinkSync(outFile);
     }
 
-    const tsBuildInfoFile = path.resolve(process.cwd(), 'node_modules', '.cache', 'federated-types', `${federationConfig.name}.tsbuildinfo`);
-    fs.mkdirSync(path.dirname(tsBuildInfoFile), { recursive: true });
-
     // write the typings file
     const program = ts.createProgram(compileFiles, {
         outFile,
@@ -172,8 +169,6 @@ try {
         emitDeclarationOnly: true,
         skipLibCheck: true,
         noCheck: true,
-        incremental: true,
-        tsBuildInfoFile,
         jsx: ts.JsxEmit.React,
         esModuleInterop: true,
     });
