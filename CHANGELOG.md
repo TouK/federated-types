@@ -1,3 +1,31 @@
+# [1.3.0](https://github.com/TouK/federated-types/compare/v1.2.1...v1.3.0) (2026-11-05)
+
+
+### Bug Fixes
+
+* ci build ([a3f874f](https://github.com/TouK/federated-types/commit/a3f874fb81da3f056b8cf20e714740cc3a03afa5))
+* **deps:** drop find-node-modules and refresh the lockfile ([24119d8](https://github.com/TouK/federated-types/commit/24119d8e8d5a987f30a6db06196c02dad3567a03))
+* extension in exposed path ([e707c3e](https://github.com/TouK/federated-types/commit/e707c3e8fb6aa53f0f9a961cf5b425b09f2626f6))
+* match exposes to emitted module names by resolved path ([11b3047](https://github.com/TouK/federated-types/commit/11b3047f32286575c3fb751d40577f73580365ec))
+* trigger beta release to verify OIDC after secret cleanup ([41fcc4e](https://github.com/TouK/federated-types/commit/41fcc4e93128f05e37968913b187c8303bddc07f))
+* trigger release after orphaned 1.3.0-beta.3 tag ([61ddeb3](https://github.com/TouK/federated-types/commit/61ddeb34bc0687a36a519ab3524b170a793dfcb8))
+* update major deps ([b7f5168](https://github.com/TouK/federated-types/commit/b7f516815c8da61760da3746ce47455c5c968c72))
+* use canonical TouK case in repository URL for npm provenance ([908e120](https://github.com/TouK/federated-types/commit/908e120becf3ace91d45faf09da4324ac533eb29))
+* use correct npm config key for min-release-age ([a50c721](https://github.com/TouK/federated-types/commit/a50c7212394ef9af1f50ebbd4a0753d012dbae0c))
+
+
+### Features
+
+* add --prune to drop modules unreachable from exposes ([6b000c3](https://github.com/TouK/federated-types/commit/6b000c3a3654d6c5dc1c84b208298f21deaad907))
+* add colored output with chalk ([1b33197](https://github.com/TouK/federated-types/commit/1b3319781edf5b2f900026dbcf718d1cbcaae515))
+* add inline config via --name and --exposes CLI arguments ([34e4752](https://github.com/TouK/federated-types/commit/34e4752e2c5b2d35e788b82faf8d463981b29368))
+
+
+### Performance Improvements
+
+* cache TS build info for incremental type generation ([e8ab9e6](https://github.com/TouK/federated-types/commit/e8ab9e633e450fd7d0d2705466b712f08d9d1cc6))
+* rename federated modules in a single pass ([9a42c84](https://github.com/TouK/federated-types/commit/9a42c844c02ef2ca72b933a8356255589da86ea6))
+
 # [1.3.0-beta.8](https://github.com/TouK/federated-types/compare/v1.3.0-beta.7...v1.3.0-beta.8) (2026-11-05)
 
 
