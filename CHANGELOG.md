@@ -1,3 +1,11 @@
+# [1.3.0-beta.8](https://github.com/TouK/federated-types/compare/v1.3.0-beta.7...v1.3.0-beta.8) (2026-11-05)
+
+
+### Bug Fixes
+
+* **deps:** drop find-node-modules and refresh the lockfile ([24119d8](https://github.com/TouK/federated-types/commit/24119d8e8d5a987f30a6db06196c02dad3567a03))
+* match exposes to emitted module names by resolved path ([11b3047](https://github.com/TouK/federated-types/commit/11b3047f32286575c3fb751d40577f73580365ec))
+
 # [1.3.0-beta.7](https://github.com/TouK/federated-types/compare/v1.3.0-beta.6...v1.3.0-beta.7) (2026-11-05)
 
 
